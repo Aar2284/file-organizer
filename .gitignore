@@ -1,0 +1,48 @@
+# Python-specific
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+*.env
+*.log
+*.pot
+*.pyc
+dist/
+build/
+*.egg-info/
+*.egg
+
+# Node.js/React-specific
+node_modules/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dist/
+build/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Editor-specific
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Miscellaneous
+*.bak
+*.swp
+*~
+*.tmp
+*.temp
+
+# Project-specific (customize as needed)
+inbox/  # If you don’t want the drop folder tracked
+destination/  # If you don’t want the organized files tracked
+*.metadata.json  # If you don’t want metadata files tracked
