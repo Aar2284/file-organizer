@@ -36,3 +36,17 @@ if os.path.exists(cred_path):
         logger.info(f"Credentials file content: {repr(content[:50])}...")  # Truncate for brevity
 else:
     logger.error(f"Credentials file not found at {cred_path}")
+
+# Initialize Google clients
+try:
+    vision_client = vision.ImageAnnotatorClient()
+    video_client = videointelligence.VideoIntelligenceServiceClient()
+    speech_client = speech.SpeechClient()
+    logger.info("Google clients initialized successfully")
+except Exception as e:
+    logger.error(f"Failed to initialize Google clients: {str(e)}")
+    raise
+
+# Initialize Mistral AI client
+MISTRAL_API_KEY = "MISTRAL_API_KEY"
+mistral_client = Mistral(api_key=MISTRAL_API_KEY)
