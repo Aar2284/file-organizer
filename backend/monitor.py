@@ -1,3 +1,4 @@
+import time
 import os
 import sys
 import shutil
@@ -25,3 +26,13 @@ stream_handler.setLevel(logging.INFO)
 stream_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 logger.addHandler(stream_handler)
+
+# Debug credentials before initializing clients
+cred_path = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', 'Not set')
+logger.info(f"GOOGLE_APPLICATION_CREDENTIALS: {cred_path}")
+if os.path.exists(cred_path):
+    with open(cred_path, 'r') as f:
+        content = f.read()
+        logger.info(f"Credentials file content: {repr(content[:50])}...")  # Truncate for brevity
+else:
+    logger.error(f"Credentials file not found at {cred_path}")
