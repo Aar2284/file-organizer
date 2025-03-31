@@ -70,3 +70,170 @@ class FileHandler(FileSystemEventHandler):
         self.destination_path = destination_path
         for category in list(self.FILE_CATEGORIES.keys()) + ['Others']:
             os.makedirs(os.path.join(destination_path, category), exist_ok=True)
+    def get_category(self, file_path):
+        ext = os.path.splitext(file_path)[1].lower()
+        for category, extensions in self.FILE_CATEGORIES.items():
+            if ext in extensions:
+                return category
+        return 'Others'
+
+    def analyze_image(self, file_path):
+        try:
+            with open(file_path, 'rb') as image_file:
+                content = image_file.read()
+            image = vision.Image(content=content)
+            response = vision_client.label_detection(image=image)
+            labels = [label.description for label in response.label_annotations[:3]]
+            logger.info(f"Image labels for {file_path}: {labels}")
+            return labels
+        except Exception as e:
+            logger.error(f"Vision API error for {file_path}: {str(e)}")
+            return ["unknown"]
+
+    def analyze_video(self, file_path):
+        try:
+            with open(file_path, 'rb') as video_file:
+                content = video_file.read()
+            operation = video_client.annotate_video(
+                request={
+                    'input_content': content,
+                    'features': [videointelligence.Feature.LABEL_DETECTION]
+                }
+            )
+            result = operation.result(timeout=120)
+            labels = [label.entity.description for label in result.annotation_results[0].segment_label_annotations[:3]]
+            logger.info(f"Video labels for {file_path}: {labels}")
+            return labels
+        except Exception as e:
+            logger.error(f"Video Intelligence error for {file_path}: {str(e)}")
+            return ["unknown"]
+
+    def analyze_audio(self, file_path):
+        try:
+            with open(file_path, 'rb') as audio_file:
+                content = audio_file.read()
+            audio = speech.RecognitionAudio(content=content)
+            config = speech.RecognitionConfig(
+                encoding=speech.RecognitionConfig.AudioEncoding.MP3,
+                sample_rate_hertz=44100,
+                language_code="en-US"
+            )
+            response = speech_client.recognize(config=config, audio=audio)
+            transcript = " ".join([result.alternatives[0].transcript for result in response.results])
+            logger.info(f"Audio transcript for {file_path}: {transcript[:50]}...")
+            return [transcript[:100]]
+        except Exception as e:
+            logger.error(f"Speech-to-Text error for {file_path}: {str(e)}")
+            return ["unknown"]
+
+    def analyze_document(self, file_path):
+        try:
+            if file_path.endswith('.pdf'):
+                with pdfplumber.open(file_path) as pdf:
+                    text = " ".join(page.extract_text() or "" for page in pdf.pages)
+            else:
+                with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                    text = f.read()
+            logger.info(f"Document text excerpt for {file_path}: {text[:50]}...")
+            return [text[:100]]
+        except Exception as e:
+            logger.error(f"Document analysis error for {file_path}: {str(e)}")
+            return ["unknown"]
+
+    def suggest_subfolder(self, category, content):
+        existing_folders = [f.name for f in os.scandir(os.path.join(self.destination_path, category)) if f.is_dir()]
+        prompt = f"Given the content: {', '.join(content)}, and existing subfolders: {', '.join(existing_folders) or 'none'}, suggest a single-word or short-phrase subfolder name (max 20 characters) within {category}. Return only the name, no explanation. Use an existing folder if it fits, otherwise a new one."
+
+        try:
+            response = mistral_client.chat.complete(
+                model="mistral-tiny",
+                messages=[{"role": "user", "content": prompt}]
+            )
+            subfolder = response.choices[0].message.content.strip().lower().replace(" ", "_")
+            subfolder = subfolder[:20]
+            subfolder = ''.join(c for c in subfolder if c.isalnum() or c == '_')
+            if not subfolder:
+                subfolder = "misc"
+            logger.info(f"Mistral suggested subfolder: {subfolder}")
+            return subfolder
+        except Exception as e:
+            logger.error(f"Mistral AI error: {str(e)}")
+            return "misc"
+
+    def generate_metadata(self, original_path, category, dest_path, subfolder=None):
+        metadata = {
+            'original_path': original_path,
+            'category': category,
+            'destination_path': dest_path,
+            'timestamp': datetime.now().isoformat()
+        }
+        if subfolder:
+            metadata['subfolder'] = subfolder
+        return metadata
+
+    def on_created(self, event):
+        if not event.is_directory:
+            file_path = event.src_path
+            logger.info(f"New file detected: {file_path}")
+            time.sleep(1)
+
+            category = self.get_category(file_path)
+            dest_folder = os.path.join(self.destination_path, category)
+
+            if category == 'Images':
+                content = self.analyze_image(file_path)
+                subfolder = self.suggest_subfolder(category, content)
+            elif category == 'Videos':
+                content = self.analyze_video(file_path)
+                subfolder = self.suggest_subfolder(category, content)
+            elif category == 'Audio':
+                content = self.analyze_audio(file_path)
+                subfolder = self.suggest_subfolder(category, content)
+            elif category == 'Documents':
+                content = self.analyze_document(file_path)
+                subfolder = self.suggest_subfolder(category, content)
+            else:
+                subfolder = None
+
+            if subfolder:
+                dest_folder = os.path.join(dest_folder, subfolder)
+                os.makedirs(dest_folder, exist_ok=True)
+
+            dest_path = os.path.join(dest_folder, os.path.basename(file_path))
+
+            try:
+                shutil.move(file_path, dest_path)
+                logger.info(f"Moved to: {dest_path}")
+
+                metadata = self.generate_metadata(file_path, category, dest_path, subfolder)
+                metadata_path = dest_path + '.metadata.json'
+                with open(metadata_path, 'w') as f:
+                    json.dump(metadata, f, indent=4)
+                logger.info(f"Metadata generated: {metadata_path}")
+
+            except Exception as e:
+                logger.error(f"Error processing {file_path}: {str(e)}")
+
+def start_monitoring():
+    watch_path = "./inbox"
+    destination_path = "./destination"
+    os.makedirs(watch_path, exist_ok=True)
+    os.makedirs(destination_path, exist_ok=True)
+
+    event_handler = FileHandler(destination_path)
+    observer = Observer()
+    observer.schedule(event_handler, watch_path, recursive=False)
+    observer.start()
+
+    logger.info(f"Started monitoring {watch_path}. Drop files to test!")
+
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        observer.stop()
+        logger.info("Monitoring stopped.")
+    observer.join()
+
+if __name__ == "__main__":
+    start_monitoring()
