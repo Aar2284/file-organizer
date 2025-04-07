@@ -70,6 +70,7 @@ class FileHandler(FileSystemEventHandler):
         self.destination_path = destination_path
         for category in list(self.FILE_CATEGORIES.keys()) + ['Others']:
             os.makedirs(os.path.join(destination_path, category), exist_ok=True)
+
     def get_category(self, file_path):
         ext = os.path.splitext(file_path)[1].lower()
         for category, extensions in self.FILE_CATEGORIES.items():

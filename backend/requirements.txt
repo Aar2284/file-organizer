@@ -1,0 +1,6 @@
+watchdog
+google-cloud-vision
+google-cloud-videointelligence
+google-cloud-speech
+pdfplumber
+mistralai
