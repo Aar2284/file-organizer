@@ -12,6 +12,8 @@ from google.cloud import videointelligence_v1 as videointelligence
 from google.cloud import speech
 import pdfplumber
 from mistralai import Mistral
+from flask import Flask, render_template, request, jsonify
+import threading
 
 # Configure logging with multiple handlers
 logger = logging.getLogger('FileOrganizer')
@@ -33,7 +35,7 @@ logger.info(f"GOOGLE_APPLICATION_CREDENTIALS: {cred_path}")
 if os.path.exists(cred_path):
     with open(cred_path, 'r') as f:
         content = f.read()
-        logger.info(f"Credentials file content: {repr(content[:50])}...")  # Truncate for brevity
+        logger.info(f"Credentials file content: {repr(content[:50])}...")
 else:
     logger.error(f"Credentials file not found at {cred_path}")
 
@@ -236,5 +238,55 @@ def start_monitoring():
         logger.info("Monitoring stopped.")
     observer.join()
 
-if __name__ == "__main__":
+# Flask app setup
+app = Flask(__name__)
+
+def run_monitoring():
     start_monitoring()
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file uploaded'}), 400
+    
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No file selected'}), 400
+    
+    file_path = os.path.join('./inbox', file.filename)
+    file.save(file_path)
+    return jsonify({'message': 'File uploaded successfully'}), 200
+
+@app.route('/files')
+def get_files():
+    inbox_files = os.listdir('./inbox')
+    destination_files = []
+    for category in FileHandler.FILE_CATEGORIES.keys():
+        category_path = os.path.join('./destination', category)
+        if os.path.exists(category_path):
+            for root, _, files in os.walk(category_path):
+                for file in files:
+                    destination_files.append(os.path.join(root, file))
+    
+    return jsonify({
+        'inbox': inbox_files,
+        'destination': destination_files
+    })
+
+@app.route('/logs')
+def get_logs():
+    try:
+        with open('file_organization.log', 'r') as f:
+            logs = f.readlines()
+        return jsonify({'logs': logs[-50:]})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+if __name__ == "__main__":
+    monitoring_thread = threading.Thread(target=run_monitoring, daemon=True)
+    monitoring_thread.start()
+    app.run(debug=True, use_reloader=False)
