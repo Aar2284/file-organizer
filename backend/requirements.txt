@@ -1,3 +1,4 @@
+flask
 watchdog
 google-cloud-vision
 google-cloud-videointelligence
