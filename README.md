@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # 📂 File Organizer
 
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
@@ -6,6 +5,8 @@
 [![Mistral AI](https://img.shields.io/badge/Mistral%20AI-FA520F?style=for-the-badge&logo=mistral-ai&logoColor=white)](#)
 
 File Organizer is a Python application designed to monitor a specified directory for newly created files and automatically categorize them into predefined folders based on their file types. It utilizes Google Cloud APIs for image, video, audio, and document analysis, as well as Mistral AI for generating intelligent subfolder names. This tool helps streamline file management by organizing files into categories such as Images, Videos, Audio, Documents, Archives, and Code.
+
+---
 
 ## ✨ Features
 
@@ -15,36 +16,19 @@ File Organizer is a Python application designed to monitor a specified directory
 - **📜 Logging**: The application logs all operations and errors for easy debugging and tracking.
 - **📝 Metadata Generation**: Metadata for each file is generated and saved alongside the file in JSON format.
 
+  ---
+
 ## ✅ Requirements
 =======
-
-# File Organizer
-
-## Overview
-
-File Organizer is a Python application designed to monitor a specified directory for newly created files and automatically categorize them into predefined folders based on their file types. It utilizes Google Cloud APIs for image, video, audio, and document analysis, as well as Mistral AI for generating intelligent subfolder names. This tool helps streamline file management by organizing files into categories such as Images, Videos, Audio, Documents, Archives, and Code.
-
-## Features
-
-- **Automatic File Categorization**: Files are organized into categories based on their extensions.
-- **Content Analysis**: Uses Google Cloud Vision for image analysis, Google Cloud Video Intelligence for video analysis, Google Cloud Speech-to-Text for audio transcription, and PDFPlumber for document text extraction.
-- **Intelligent Subfolder Naming**: Mistral AI suggests subfolder names based on the content of the files and existing folder names.
-- **Logging**: The application logs all operations and errors for easy debugging and tracking.
-- **Metadata Generation**: Metadata for each file is generated and saved alongside the file in JSON format.
-
-## Requirements
->>>>>>> 078b63993089746f2599c152c4fa8cde1d74e3d7
-
 - Python 3.7 or higher
 - Google Cloud SDK with the necessary APIs enabled (Vision, Video Intelligence, Speech)
 - Mistral AI API key
 - Required Python libraries listed in `requirements.txt` (see below)
 
-<<<<<<< HEAD
+---
+
 ## 🚀 Installation
 =======
-## Installation
->>>>>>> 078b63993089746f2599c152c4fa8cde1d74e3d7
 
 1. Clone this repository:
 
@@ -70,11 +54,10 @@ File Organizer is a Python application designed to monitor a specified directory
 
 4. Obtain your Mistral API key and replace the placeholder in the code.
 
-<<<<<<< HEAD
+---
+
 ## ▶️ Usage
 =======
-## Usage
->>>>>>> 078b63993089746f2599c152c4fa8cde1d74e3d7
 
 1. Create an `inbox` directory in the project root. This is where you will drop files for organization.
 
@@ -88,14 +71,19 @@ File Organizer is a Python application designed to monitor a specified directory
 
 4. Drop files into the `inbox` directory. The application will automatically organize them into the `destination` directory based on their type.
 
-<<<<<<< HEAD
+---
+
 ## 📋 Logging
 
 The application logs its activities to `file_organization.log`, which includes information about processed files, errors, and metadata generation.
 
+---
+
 ## 🤝 Contributing
 
 Contributions are welcome! If you have suggestions or improvements, please open an issue or submit a pull request.
+
+---
 
 ## 📄 License
 
@@ -105,22 +93,3 @@ This project is licensed under the MIT License. See the LICENSE file for details
 
 - Google Cloud for providing powerful API services.
 - Mistral AI for intelligent content analysis.
-=======
-## Logging
-
-The application logs its activities to `file_organization.log`, which includes information about processed files, errors, and metadata generation.
-
-## Contributing
-
-Contributions are welcome! If you have suggestions or improvements, please open an issue or submit a pull request.
-
-## License
-
-This project is licensed under the MIT License. See the LICENSE file for details.
-
-## Acknowledgments
-
-- Google Cloud for providing powerful API services.
-- Mistral AI for intelligent content analysis.
-```
->>>>>>> 078b63993089746f2599c152c4fa8cde1d74e3d7
