@@ -1,7 +1,7 @@
 # 📂 File Organizer
 
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
-[![Google Cloud](img.shields.io)](https://cloud.google.com/)[![o](img.shields.io)](https://cloud.google.com/)[![o](img.shields.io)](https://cloud.google.com/)[![g](img.shields.io)](https://cloud.google.com/)
+[![Google Cloud Status](img.shields.io)](cloud.google.com)[![o](img.shields.io)](cloud.google.com)[![o](img.shields.io)](cloud.google.com)[![g](img.shields.io)](cloud.google.com)
 [![Mistral AI](https://img.shields.io/badge/Mistral%20AI-FA520F?style=for-the-badge&logo=mistral-ai&logoColor=white)](#)
 
 File Organizer is a Python application designed to monitor a specified directory for newly created files and automatically categorize them into predefined folders based on their file types. It utilizes Google Cloud APIs for image, video, audio, and document analysis, as well as Mistral AI for generating intelligent subfolder names. This tool helps streamline file management by organizing files into categories such as Images, Videos, Audio, Documents, Archives, and Code.
